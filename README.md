@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Deploy Next.js on Internet Information Services
 
-## Getting Started
+## Required
 
-First, run the development server:
+- Windows OS and IIS Management Tools
+    - Enable "Control Panel > Turn Windows features on or off > Internet Information Services > Web Management Tools" and "World Wide Web Services"
+    - Inside Word Wide web Services > Application Development Features, enable all except CGI
+- [iisnode](https://github.com/tjanczuk/iisnode)
+    - find Installing for IIS 7.x/8.x
+- [URL Rewrite Module for IIS](https://iis-umbraco.azurewebsites.net/downloads/microsoft/url-rewrite)
+    - just scroll to bottom
+- Node.js
+    - path for node.exe will be needed
+- server.js and web.config
+    - I found simpler: https://github.com/mfmakarim/nextjs-iis
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Steps
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Normal output
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+In the Windows OS environment.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create `server.js` at the root of project, this file acts as custom node server. Just copy file from this project.
+2. Create `web.config` which will be used by IIS. Also just copy file from here.
+3. Build the app, with `npm run build` or other package managers.
+4. Change `package.json` scripts.start to `NODE_ENV=production node server.js`.
+5. Run the app `npm start`. If error NODE_ENV occurs, simply `npm install -g win-node-env` then re-run
+6. Open IIS Manager, on the left side, click "Sites", then on the right, "Add Website...", add your site name, and set physical path to this project dir
+7. Click the site name which has created, on the right there is "Edit Permissions", move to tab Security, add if not exist, add "Group or user names" with name IIS_IUSRS (check names because it should exist if the system enable IIS). Give full control to that role/object.
+8. Open the web via "Browse Website" (right bottom)
+9. Back to IIS Manager, go to Application Pools, at the bottom there will be this project name, and click it, go to "Advanced Settings..." and change the Identity from "ApplicationPoolIdentity" to "LocalSystem"
 
-## Learn More
+### Standalone output
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. if in the next.config you use `output: "standalone"` then you know that public folder and .next/static folder is needed, just place them in the standalone folder
+2. Copy the server.js and web.config to that standalone folder.
+3. Because there is an issue when run [custom server](https://nextjs.org/docs/pages/building-your-application/configuring/custom-server) with standalone build, the solution I found is to copy `const nextConfig = ...` and `process.env.__NEXT_PRIVATE_STANDALONE_CONFIG = JSON.stringify(nextConfig)` paste them before `const app = next({ dev })`.
+4. `npm run start` or `node start.js`
+5. Done
