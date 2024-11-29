@@ -41,3 +41,11 @@ In the Windows OS environment.
 5. Start the server either with `npm run start` or `NODE_ENV=production node server.js`
 6. Create a new site in IIS management, set the physical path to that standalone folder, don't forget to give full control to IIS_USRS and also do step 9 in Normal Output
 7. Access the website by "Browse Website" (at right bottom IIS control) or access directly in browser by typing the host, mostly localhost with port that has been binded when you create a new site in IIS management tool
+
+## Important
+
+1. Do not change control flow logic in server.js, line starts with `if (pathname === '/a')`, it may not work as intended
+
+## Alternative Way
+
+1. Reverse Proxy IIS: https://www.youtube.com/watch?v=qOjWA_Z_zF8
